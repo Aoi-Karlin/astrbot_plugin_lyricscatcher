@@ -7,8 +7,9 @@ import asyncio
 import aiohttp
 import hashlib
 import json
-import os
-from typing import Optional, Dict, List
+import random
+import re
+from typing import Optional, Dict
 from pathlib import Path
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
@@ -18,9 +19,9 @@ from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 @register(
     "lyrics_catcher",
-    "YourName",
-    "自动检测歌词并接歌",
-    "1.0.0"
+    "Azured",
+    "基于网易云API的接歌词插件",
+    "1.0.1"
 )
 class LyricsCatcher(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
@@ -183,7 +184,6 @@ class LyricsCatcher(Star):
 
     def _clean_text(self, text: str) -> str:
         """清理文本，移除标点和空格"""
-        import re
         # 移除标点符号和空格
         text = re.sub(r'[^\w\s]', '', text)
         text = text.replace(' ', '').lower()
@@ -203,7 +203,6 @@ class LyricsCatcher(Star):
             return
         
         # 触发概率控制（1-100）
-        import random
         if random.randint(1, 100) > self.trigger_probability:
             return
         
