@@ -1,33 +1,32 @@
 {
-  "api_base_url": {
-    "description": "网易云音乐 API 地址",
-    "type": "string",
-    "default": "https://127.0.0.1:3000",
-    "hint": "请填写 BinaryFly 网易云音乐 API 的部署地址，例如: https://netease-cloud-music-api.vercel.app",
-    "obvious_hint": true
-  },
-  "min_match_length": {
-    "description": "最小匹配长度",
-    "type": "int",
-    "default": 5,
-    "hint": "消息长度小于此值时不会触发歌词检测"
-  },
-  "max_cache_size": {
-    "description": "最大缓存数量",
-    "type": "int",
-    "default": 1000,
-    "hint": "缓存的歌词数量上限，超过后会自动清理旧数据"
-  },
-  "enable_cache": {
-    "description": "启用缓存",
-    "type": "bool",
-    "default": true,
-    "hint": "是否缓存已搜索的歌词，可以提高响应速度并减少 API 请求"
-  },
-  "trigger_probability": {
-    "description": "触发概率 (%)",
-    "type": "int",
-    "default": 100,
-    "hint": "接歌的触发概率，范围 1-100。设置为 100 表示每次都触发，设置为 50 表示 50% 概率触发"
-  }
+    "type": "object",
+    "properties": {
+        "api_url": {
+            "type": "string",
+            "title": "网易云 API 地址",
+            "description": "填写你部署的 NeteaseCloudMusicApi 地址，例如 http://localhost:3000",
+            "default": "http://localhost:3000"
+        },
+        "similarity_threshold": {
+            "type": "number",
+            "title": "匹配相似度",
+            "description": "0.0 到 1.0 之间。值越高要求匹配越精准，建议 0.7-0.8。",
+            "default": 0.8,
+            "minimum": 0,
+            "maximum": 1
+        },
+        "search_min_length": {
+            "type": "integer",
+            "title": "触发搜索最小长度",
+            "description": "用户发送的文字达到多少位才尝试搜索歌词，防止短词误触发。",
+            "default": 5,
+            "minimum": 1
+        },
+        "enable_cache": {
+            "type": "boolean",
+            "title": "开启本地缓存",
+            "description": "是否将搜索过的歌词保存到本地，减少 API 调用。",
+            "default": true
+        }
+    }
 }
