@@ -1,32 +1,35 @@
 {
-    "type": "object",
-    "properties": {
-        "api_url": {
-            "type": "string",
-            "title": "网易云 API 地址",
-            "description": "填写你部署的 NeteaseCloudMusicApi 地址，例如 http://localhost:3000",
-            "default": "http://localhost:3000"
-        },
-        "similarity_threshold": {
-            "type": "number",
-            "title": "匹配相似度",
-            "description": "0.0 到 1.0 之间。值越高要求匹配越精准，建议 0.7-0.8。",
-            "default": 0.8,
-            "minimum": 0,
-            "maximum": 1
-        },
-        "search_min_length": {
-            "type": "integer",
-            "title": "触发搜索最小长度",
-            "description": "用户发送的文字达到多少位才尝试搜索歌词，防止短词误触发。",
-            "default": 5,
-            "minimum": 1
-        },
-        "enable_cache": {
-            "type": "boolean",
-            "title": "开启本地缓存",
-            "description": "是否将搜索过的歌词保存到本地，减少 API 调用。",
-            "default": true
-        }
+  "type": "object",
+  "properties": {
+    "api_url": {
+      "type": "string",
+      "title": "网易云API地址",
+      "description": "填写你部署的NeteaseCloudMusicApi地址，例如 http://localhost:3000",
+      "default": "http://localhost:3000",
+      "pattern": "^https?://.+$"
+    },
+    "similarity_threshold": {
+      "type": "number",
+      "title": "匹配相似度阈值",
+      "description": "0.0 到 1.0 之间。值越高要求匹配越精准，建议 0.7-0.9。",
+      "default": 0.8,
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "search_min_length": {
+      "type": "integer",
+      "title": "触发搜索最小长度",
+      "description": "用户发送的文字达到多少位才尝试搜索歌词，防止短词误触发。",
+      "default": 5,
+      "minimum": 1,
+      "maximum": 50
+    },
+    "enable_cache": {
+      "type": "boolean",
+      "title": "开启本地缓存",
+      "description": "是否将搜索过的歌词保存到本地，减少API调用。",
+      "default": true
     }
+  },
+  "required": ["api_url"]
 }
