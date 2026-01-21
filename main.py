@@ -9,9 +9,11 @@ import hashlib
 import json
 import os
 from typing import Optional, Dict, List
+from pathlib import Path
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
-from astrbot.api import AstrBotConfig
+from astrbot.api import AstrBotConfig, logger
+from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 
 @register(
@@ -32,13 +34,14 @@ class LyricsCatcher(Star):
         self.enable_cache = self.config.get("enable_cache", True)
         self.trigger_probability = self.config.get("trigger_probability", 100)
         
-        # 初始化缓存
-        self.cache_dir = os.path.join(context.base_path, "data", "lyrics_cache")
-        os.makedirs(self.cache_dir, exist_ok=True)
-        self.cache_file = os.path.join(self.cache_dir, "lyrics_cache.json")
+        # 初始化缓存 - 使用正确的路径获取方式
+        data_path = get_astrbot_data_path()
+        self.cache_dir = data_path / "plugin_data" / "lyrics_catcher"
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_file = self.cache_dir / "lyrics_cache.json"
         self.lyrics_cache: Dict[str, Dict] = self._load_cache()
         
-        self.logger.info(f"接歌词插件初始化完成，缓存大小: {len(self.lyrics_cache)}")
+        logger.info(f"接歌词插件初始化完成，缓存大小: {len(self.lyrics_cache)}")
 
     def _load_cache(self) -> Dict[str, Dict]:
         """从文件加载缓存"""
@@ -46,11 +49,11 @@ class LyricsCatcher(Star):
             return {}
         
         try:
-            if os.path.exists(self.cache_file):
+            if self.cache_file.exists():
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
         except Exception as e:
-            self.logger.error(f"加载缓存失败: {e}")
+            logger.error(f"加载缓存失败: {e}")
         return {}
 
     def _save_cache(self):
@@ -68,7 +71,7 @@ class LyricsCatcher(Star):
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump(self.lyrics_cache, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            self.logger.error(f"保存缓存失败: {e}")
+            logger.error(f"保存缓存失败: {e}")
 
     def _get_cache_key(self, lyrics_text: str) -> str:
         """生成缓存键"""
@@ -87,7 +90,7 @@ class LyricsCatcher(Star):
         # 检查缓存
         cache_key = self._get_cache_key(lyrics_text)
         if cache_key in self.lyrics_cache:
-            self.logger.info(f"命中缓存: {lyrics_text[:20]}...")
+            logger.info(f"命中缓存: {lyrics_text[:20]}...")
             return self.lyrics_cache[cache_key]
 
         try:
@@ -102,14 +105,14 @@ class LyricsCatcher(Star):
                 
                 async with session.get(search_url, params=params, timeout=10) as resp:
                     if resp.status != 200:
-                        self.logger.error(f"搜索请求失败: {resp.status}")
+                        logger.error(f"搜索请求失败: {resp.status}")
                         return None
                     
                     data = await resp.json()
                     songs = data.get('result', {}).get('songs', [])
                     
                     if not songs:
-                        self.logger.info(f"未找到相关歌曲: {lyrics_text[:20]}...")
+                        logger.info(f"未找到相关歌曲: {lyrics_text[:20]}...")
                         return None
 
                 # 获取第一首歌的歌词
@@ -122,7 +125,7 @@ class LyricsCatcher(Star):
                 
                 async with session.get(lyrics_url, params=params, timeout=10) as resp:
                     if resp.status != 200:
-                        self.logger.error(f"获取歌词失败: {resp.status}")
+                        logger.error(f"获取歌词失败: {resp.status}")
                         return None
                     
                     lyric_data = await resp.json()
@@ -149,9 +152,9 @@ class LyricsCatcher(Star):
                     return result
                     
         except asyncio.TimeoutError:
-            self.logger.error("API 请求超时")
+            logger.error("API 请求超时")
         except Exception as e:
-            self.logger.error(f"搜索歌词出错: {e}")
+            logger.error(f"搜索歌词出错: {e}")
         
         return None
 
@@ -204,7 +207,7 @@ class LyricsCatcher(Star):
         if random.randint(1, 100) > self.trigger_probability:
             return
         
-        self.logger.info(f"检测消息: {message_text[:30]}...")
+        logger.info(f"检测消息: {message_text[:30]}...")
         
         # 搜索歌词
         result = await self._search_lyrics(message_text)
@@ -217,7 +220,7 @@ class LyricsCatcher(Star):
             reply = f"{next_line}\n\n{song_info}"
             yield event.plain_result(reply)
             
-            self.logger.info(f"成功接歌: {song_info}")
+            logger.info(f"成功接歌: {song_info}")
 
     @filter.command("lyrics_stats")
     async def get_stats(self, event: AstrMessageEvent):
