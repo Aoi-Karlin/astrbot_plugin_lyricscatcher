@@ -189,12 +189,30 @@ class Main(star.Star):
                     song_name=song_name
                 )
                 
-                # Silently trigger LLM using current personality
-                # Use send() to leverage the default personality of current conversation
-                await event.send(MessageChain([Plain(prompt)]))
+                # Get current chat provider ID for this session
+                umo = event.unified_msg_origin
+                provider_id = await self.context.get_current_chat_provider_id(umo=umo)
                 
-                # Log the trigger
-                logger.info(f"Lyric Trigger plugin: 已静默触发LLM回复（使用当前人格），歌曲: {song_name}, 歌词: {matched_line} -> {next_line}")
+                if not provider_id:
+                    await event.send(MessageChain([Plain("❌ 无法获取当前会话的LLM配置，请确保已配置LLM提供商。")]))
+                    return
+                
+                # Call LLM to generate response
+                try:
+                    llm_resp = await self.context.llm_generate(
+                        chat_provider_id=provider_id,
+                        prompt=prompt,
+                    )
+                    
+                    # Send LLM's response
+                    if llm_resp and llm_resp.completion_text:
+                        await event.send(MessageChain([Plain(llm_resp.completion_text)]))
+                        logger.info(f"Lyric Trigger plugin: 已触发LLM回复，歌曲: {song_name}, 歌词: {matched_line} -> {next_line}")
+                    else:
+                        await event.send(MessageChain([Plain("❌ LLM未返回有效回复。")]))
+                except Exception as llm_error:
+                    logger.error(f"Lyric Trigger plugin: LLM调用失败: {llm_error}")
+                    await event.send(MessageChain([Plain(f"❌ LLM调用失败：{str(llm_error)}")]))
             else:
                 # No match found
                 error_msg = f"❌ 未找到匹配的歌词。\n\n可能的原因：\n• 相似度低于阈值（当前：{self.config['similarity_threshold']})\n• 未在搜索结果中找到匹配歌曲\n• 歌词内容可能不够独特\n\n建议：尝试更长的歌词片段或调整配置参数。"
