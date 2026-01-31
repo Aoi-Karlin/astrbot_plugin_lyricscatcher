@@ -190,8 +190,8 @@ class Main(star.Star):
                 )
                 
                 # Silently trigger LLM using current personality
-                # Use reply() to leverage the default personality of current conversation
-                await event.reply(MessageChain([Plain(prompt)]))
+                # Use send() to leverage the default personality of current conversation
+                await event.send(MessageChain([Plain(prompt)]))
                 
                 # Log the trigger
                 logger.info(f"Lyric Trigger plugin: 已静默触发LLM回复（使用当前人格），歌曲: {song_name}, 歌词: {matched_line} -> {next_line}")
