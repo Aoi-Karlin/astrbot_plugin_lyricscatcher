@@ -78,6 +78,7 @@ class Main(star.Star):
 
     def __init__(self, context, config: Optional[Dict[str, Any]] = None):
         super().__init__(context)
+        self.context = context
         self.config = config or {}
         
         # Default configuration
@@ -162,12 +163,9 @@ class Main(star.Star):
         return None
 
     @filter.command("歌词匹配", alias={"lyric", "匹配歌词", "lyricmatch"}, priority=100)
-    async def cmd_lyric_match(self, event: AstrMessageEvent, *args):
+    async def cmd_lyric_match(self, event: AstrMessageEvent, lyric_text: str):
         """指令触发歌词匹配和AI回复。使用方法：/歌词匹配 <歌词内容>"""
         event.stop_event()
-        
-        # Get lyric text from args
-        lyric_text = " ".join(args) if args else ""
         
         # Check if lyric text is provided
         if not lyric_text.strip():
