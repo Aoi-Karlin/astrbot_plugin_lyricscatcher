@@ -1,0 +1,32 @@
+{
+  "api_url": {
+    "type": "string",
+    "label": "网易云API地址",
+    "description": "您自行部署的 NeteaseCloudMusicApi 服务地址，例如：http://127.0.0.1:3000",
+    "default": "http://127.0.0.1:3000"
+  },
+  "similarity_threshold": {
+    "type": "float",
+    "label": "最低触发匹配度",
+    "description": "歌词相似度阈值（0.0-1.0）。数值越高，匹配越精确但越难触发。建议0.5-0.8之间。",
+    "default": 0.6,
+    "min": 0.1,
+    "max": 1.0,
+    "step": 0.05
+  },
+  "max_search_results": {
+    "type": "int",
+    "label": "最大搜索结果数",
+    "description": "每次搜索歌词时，最多检查多少首歌曲。数值越大，匹配概率越高但速度越慢。",
+    "default": 5,
+    "min": 1,
+    "max": 20
+  },
+  "trigger_prompt": {
+    "type": "string",
+    "label": "触发提示词",
+    "description": "当匹配到歌词时，发送给LLM的提示词模板。可用变量：{lyric}（当前歌词）、{next_line}（下一句歌词）、{song_name}（歌曲名）",
+    "default": "用户输入了歌词：'{lyric}'，下一句是：'{next_line}'。请根据这两句歌词进行回应，可以：\n1. 继续接唱\n2. 评论这两句歌词\n3. 表达相关的情感或联想\n请用自然、富有情感的方式回复，不要超过两句话。",
+    "multiline": true
+  }
+}
