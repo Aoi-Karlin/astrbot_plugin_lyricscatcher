@@ -197,17 +197,21 @@ class Main(star.Star):
                     await event.send(MessageChain([Plain("❌ 无法获取当前会话的LLM配置，请确保已配置LLM提供商。")]))
                     return
                 
-                # Call LLM to generate response
+                # Call LLM to generate response using tool_loop_agent to preserve personality
+                # This will use the current session's system prompt and tools
                 try:
-                    llm_resp = await self.context.llm_generate(
+                    llm_resp = await self.context.tool_loop_agent(
+                        event=event,
                         chat_provider_id=provider_id,
                         prompt=prompt,
+                        tools=None,  # No tools needed for this simple lyric response
+                        max_steps=1,  # Single LLM call, no tool loops needed
                     )
                     
                     # Send LLM's response
                     if llm_resp and llm_resp.completion_text:
                         await event.send(MessageChain([Plain(llm_resp.completion_text)]))
-                        logger.info(f"Lyric Trigger plugin: 已触发LLM回复，歌曲: {song_name}, 歌词: {matched_line} -> {next_line}")
+                        logger.info(f"Lyric Trigger plugin: 已触发LLM回复（使用当前人格），歌曲: {song_name}, 歌词: {matched_line} -> {next_line}")
                     else:
                         await event.send(MessageChain([Plain("❌ LLM未返回有效回复。")]))
                 except Exception as llm_error:
