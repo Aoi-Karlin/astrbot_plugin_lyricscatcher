@@ -162,9 +162,12 @@ class Main(star.Star):
         return None
 
     @filter.command("歌词匹配", alias={"lyric", "匹配歌词", "lyricmatch"}, priority=100)
-    async def cmd_lyric_match(self, event: AstrMessageEvent, lyric_text: str = ""):
+    async def cmd_lyric_match(self, event: AstrMessageEvent, *args):
         """指令触发歌词匹配和AI回复。使用方法：/歌词匹配 <歌词内容>"""
         event.stop_event()
+        
+        # Get lyric text from args
+        lyric_text = " ".join(args) if args else ""
         
         # Check if lyric text is provided
         if not lyric_text.strip():
