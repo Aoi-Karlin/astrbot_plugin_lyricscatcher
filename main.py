@@ -157,7 +157,7 @@ class Main(star.Star):
                 
                 if similarity >= self.config["similarity_threshold"]:
                     next_line = lines[i + 1]
-                    return (song_name, line, next_line, song_id)
+                    return song_name, line, next_line, song_id
         
         return None
 
@@ -196,12 +196,11 @@ class Main(star.Star):
                 logger.info(f"Lyric Trigger plugin: 已静默触发LLM回复，歌曲: {song_name}, 歌词: {matched_line} -> {next_line}")
             else:
                 # No match found
-                await event.send(MessageChain([Plain("❌ 未找到匹配的歌词。\n\n可能的原因：\n• 相似度低于阈值（当前：{}）\n• 未在搜索结果中找到匹配歌曲\n• 歌词内容可能不够独特\n\n建议：尝试更长的歌词片段或调整配置参数。".format(
-                    self.config["similarity_threshold"]
-                ))]))
+                error_msg = f"❌ 未找到匹配的歌词。\n\n可能的原因：\n• 相似度低于阈值（当前：{self.config['similarity_threshold']})\n• 未在搜索结果中找到匹配歌曲\n• 歌词内容可能不够独特\n\n建议：尝试更长的歌词片段或调整配置参数。"
+                await event.send(MessageChain([Plain(error_msg)]))
         except Exception as e:
             logger.error(f"Lyric Trigger plugin: 处理失败: {e}")
-            await event.send(MessageChain([Plain(f"处理失败：{str(e)}"])))
+            await event.send(MessageChain([Plain(f"处理失败：{str(e)}")]))
         finally:
             # Clean up processing message if needed
             pass
